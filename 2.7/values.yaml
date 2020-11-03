@@ -1,0 +1,122 @@
+# Path do NFS
+volume:
+  pathDefault: /home/mgeweb/compartilhado/
+  
+# Imagens Hub e Versões
+imageRepository:
+  storageClass: "volume-claim"
+  jivaw:
+    fullName: "jiva-w"
+    image: "sankhyacloud/plataforma-om:jdk11-1.2.0"
+    imageTag: "v2.2"
+  sas:
+    fullName: "sas"
+    image: "highlanderdantas/sas"
+    imageTag: "v2.5"
+  datasync:
+    fullName: "datasync"
+    image: "highlanderdantas/datasync"
+    imageTag: "v2.0"
+  esocial:
+    fullName: "esocial"
+    image: "highlanderdantas/esocial"
+    imageTag: "v2.0"
+  
+jboss:
+  envs: -Duser.language=pt -Duser.country=BR -Dsun.jnu.encoding=ISO-8859-1 -Dfile.encoding=ISO-8859-1
+
+annotations: {}
+
+## Pacote para Instalação
+pacote:
+  versao: "jiva-w_4.4b338.pkg"
+  versionNew: ""
+
+## Dados do Banco de Dados
+banco:
+  tipo: "ORACLE"
+  ip: ""
+  porta: "1521"
+  sid: "ORCL"
+  usuario: "System"
+  senha: "tecsis"
+  alias: "dboci1"
+
+bancos_existentes:
+  dboci1: 172.31.30.3
+  dboci2: 172.31.30.4
+  dboci3: 172.31.30.8
+  dbocit1: 172.31.30.15
+
+
+
+## Memoria 
+memoria:
+  jivaw:
+    jboss: "-Xms512m -Xmx1304m"
+    maximo: "1536"
+    media: "1024"
+  datasync:
+    maximo: "1024"
+    media: "250"
+  sas:
+    maximo: "400"
+    media: "100"
+
+
+## Cpu 
+cpu:
+  jivaw:
+    maximo: "550m"
+    media: "100m"
+  datasync:
+    maximo: "400m"
+    media: "100m"
+  sas:
+    maximo: "150m"
+    media: "100m"
+
+## Possui SAs
+sasdelphi:
+  enabled: false
+
+## Possui SanNfe
+sannfe:
+  enabled: false
+
+## Possui Jivaw
+jivaw:
+  enabled: true
+
+## Possui Datasync
+datasync:
+  enabled: false
+
+## Possui Esocial
+esocial:
+  enabled: false
+
+## Chave SAS
+sas:
+  chaveCliente: ""
+
+## Extensões
+extension:
+  enabled: false
+
+
+## Configurações de url de acesso
+loadBalancer:
+  dns: .teste.jivacloud.com.br
+  dnsNew: ""
+  jivaw:
+    enabled: false
+  datasync:
+    enabled: false
+  esocial:
+    enabled: false
+
+dns:
+  nameservers:
+    - 208.67.222.222
+    - 8.8.8.8

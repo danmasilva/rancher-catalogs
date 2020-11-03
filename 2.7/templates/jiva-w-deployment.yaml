@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jiva-w
+  generation: 1
+  labels:
+    io.kompose.service: jiva-w
+    {{- if ne .Values.banco.alias "outro..."}}
+    cloud.dbName: "{{ .Values.banco.alias }}"
+    {{- end }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      io.kompose.service: jiva-w
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+      {{- range $key, $value := .Values.annotations }}
+        {{ $key }}: {{ $value }}
+      {{- end }}
+      labels:
+        io.kompose.service: jiva-w
+        {{- if ne .Values.banco.alias "outro..."}}
+        cloud.dbName: "{{ .Values.banco.alias }}"
+        {{- end }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: monitoring
+                operator: NotIn
+                values:
+                - "true"
+      containers:
+      - args:
+        - sudo chown -R mgeweb:mgeweb /home/mgeweb/.jboss_conf/ /home/mgeweb/sankhyaw-dpm/ /home/mgeweb/SankhyaW/Anexos
+          /home/mgeweb/repositorio /home/mgeweb/pacotes-sannfe/ && /home/mgeweb/DPM/scripts/./wildfly.sh
+          ; java -jar /home/mgeweb/DPM/docker-package-manager.jar ; /home/mgeweb/DPM/scripts/./sannfe.sh;
+          sudo chown -R mgeweb:mgeweb /home/mgeweb/SanNFe /home/mgeweb/wildfly_producao/standalone/log
+          && /home/mgeweb/DPM/scripts/./visualvm.sh && sleep 10  && sed -i 's/<min-pool-size>100/<min-pool-size>15/g' /home/mgeweb/wildfly_producao/standalone/deployments/mge-ds.xml &&
+          sed -i 's/<max-pool-size>100/<max-pool-size>50/g' /home/mgeweb/wildfly_producao/standalone/deployments/mge-ds.xml
+          && sleep 30 ; /home/mgeweb/wildfly_producao/bin/./standalone.sh
+          -Djape.lazy.init=true -Djape.lob.fields.as.lazy=true -Djape.ignore.ligacao.inconsistente=true -Dsankhyaw.schedule.disable=true
+        command:
+        - /bin/sh
+        - -c
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "{{ .Values.jboss.envs }}"
+        - name: HASSANFE
+          value: "{{ .Values.sannfe.enabled }}"
+        - name: CHAVESAS
+          value: "{{ .Values.sas.chaveCliente }}"
+        - name: CLIENTE
+          value: "{{ .Release.Namespace }}"
+        - name: MEMORIA_JBOSS
+          value: "{{ .Values.memoria.jivaw.jboss }}"
+        - name: PACOTE_JIVAW
+          value: "{{ .Values.pacote.versao }}"
+        - name: PORTA_BD_JIVAW
+          value: "{{ .Values.banco.porta }}"
+        - name: TIPO_BD
+          value: "{{ .Values.banco.tipo }}"
+        - name: TIPO_SERVIDOR
+          value: "WILDFLY"
+        - name: SID_BD_JIVAW
+          value: "{{ .Values.banco.sid }}"
+        - name: SID_BD_JIVAW
+          value: "{{ .Values.banco.sid }}"
+        - name: IP_BD_JIVAW
+          valueFrom:
+            secretKeyRef:
+              name: jiva-w
+              key: banco-ip
+        - name: SENHA_BD_JIVAW
+          valueFrom:
+            secretKeyRef:
+              name: jiva-w
+              key: banco-password
+        - name: USUARIO_BD_JIVAW
+          valueFrom:
+            secretKeyRef:
+              name: jiva-w
+              key: banco-user 
+        image: {{  .Values.imageRepository.jivaw.image }}:{{  .Values.imageRepository.jivaw.imageTag }}
+        imagePullPolicy: IfNotPresent
+        name: jiva-w
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 280
+          periodSeconds: 280
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 280
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 280
+          periodSeconds: 280
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 280
+        resources:
+          limits:
+            memory: {{ .Values.memoria.jivaw.maximo }}Mi
+            cpu:  {{ .Values.cpu.jivaw.maximo }}
+          requests:
+            memory: {{ .Values.memoria.jivaw.media }}Mi
+            cpu: {{ .Values.cpu.jivaw.media }}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities: {}
+          privileged: true
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /home/mgeweb/repositorio
+          name: volume-repositorio
+        - mountPath: /home/mgeweb/SanNFe
+          name: volume-sannfe
+        - mountPath: /home/mgeweb/SankhyaW/Anexos
+          name: volume-anexos
+        - mountPath: /home/mgeweb/pacotes-sannfe/
+          name: volume-pacotessanfe
+        - mountPath: /home/mgeweb/sankhyaw-dpm/pkgs
+          name: volume-pacotesjivaw
+        - mountPath: /home/mgeweb/.jboss_conf
+          name: volume-jbossconfig
+      dnsConfig:
+        nameservers:
+        {{- range .Values.dns.nameservers }}
+          - {{ . | title | quote }}
+        {{- end }}  
+        options:
+        - name: ndots
+          value: "15"
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: volume-repositorio
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/repositorio/
+          type: DirectoryOrCreate
+      - name: volume-sannfe
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/SanNFe/
+          type: DirectoryOrCreate
+      - name: volume-anexos
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/Anexos/
+          type: DirectoryOrCreate
+      - name: volume-pacotessanfe
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/pacotes/sannfe/
+          type: DirectoryOrCreate
+      - name: volume-pacotesjivaw
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}pacotesjivaw/
+          type: DirectoryOrCreate
+      - name: volume-jbossconfig
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/jboss_config/
+          type: DirectoryOrCreate
+status: {}

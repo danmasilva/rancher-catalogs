@@ -1,0 +1,51 @@
+{{- if ( or .Values.loadBalancer.jivaw.enabled .Values.loadBalancer.esocial.enabled  .Values.loadBalancer.datasync.enabled ) }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  generation: 1
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 200m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
+spec:
+  rules:
+  {{- if .Values.loadBalancer.jivaw.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: {{ .Release.Namespace }}{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: {{ .Release.Namespace }}{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: jiva-w
+          servicePort: 8080
+  {{- end }}
+  {{- if .Values.loadBalancer.datasync.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: datasync-{{ .Release.Namespace }}{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: datasync-{{ .Release.Namespace }}{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: datasync
+          servicePort: 8080
+  {{- end }}
+  {{- if .Values.loadBalancer.esocial.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: esocial-{{ .Release.Namespace }}{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: esocial-{{ .Release.Namespace }}{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: esocial
+          servicePort: 8778
+  {{- end }}
+status:
+  loadBalancer: {}
+{{- end }}
