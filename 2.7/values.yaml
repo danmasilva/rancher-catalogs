@@ -7,8 +7,8 @@ imageRepository:
   storageClass: "volume-claim"
   jivaw:
     fullName: "jiva-w"
-    image: "sankhyacloud/plataforma-om:jdk11-1.2.0"
-    imageTag: "v2.2"
+    image: "sankhyacloud/plataforma-om"
+    imageTag: "jdk11-1.2.0"
   sas:
     fullName: "sas"
     image: "highlanderdantas/sas"

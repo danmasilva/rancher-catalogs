@@ -74,6 +74,8 @@ spec:
           value: "{{ .Values.banco.sid }}"
         - name: SID_BD_JIVAW
           value: "{{ .Values.banco.sid }}"
+        - name: HAS_EXTENSIONS
+          value: "{{ .Values.extension.enabled }}"
         - name: IP_BD_JIVAW
           valueFrom:
             secretKeyRef:
@@ -136,6 +138,10 @@ spec:
           name: volume-pacotesjivaw
         - mountPath: /home/mgeweb/.jboss_conf
           name: volume-jbossconfig
+        {{ if HAS_EXTENSIONS }}
+        - mountPath: /home/mgeweb/package-manager/extensions
+          name: extensions
+        {{ end }}
       dnsConfig:
         nameservers:
         {{- range .Values.dns.nameservers }}
@@ -173,4 +179,10 @@ spec:
         hostPath: 
           path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/jboss_config/
           type: DirectoryOrCreate
+      {{ if HAS_EXTENSIONS }}
+      - name: extensions
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/extensions/
+          type: DirectoryOrCreate
+      {{ end }}
 status: {}

@@ -1,7 +1,7 @@
 categories:
 - jiva
 labels:
-  io.rancher.certified: teste
+  io.rancher.certified: prod
 questions:
 # Pacote Instalação
 - variable: pacote.versao

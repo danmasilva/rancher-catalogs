@@ -3,7 +3,7 @@
 ### Informações:
 
  Este template faz a criação de todos os artefatos necessários para o cliente utilizar o **Jiva-W**.
- Utilizando **JDK13**;
+ Utilizando **JDK11**;
  
 ### Como usar?:
 
@@ -16,6 +16,7 @@
 - Usuário do Banco de Dados
 - Senha do Banco de Dados
 - Porta no qual a aplicação será exposta
+- Se a aplicação possuir extensões, URL para download do zip contendo as extensões
 
  Clique em **Iniciar** para fazer o deploy de todos os artefatos.
 
