@@ -103,6 +103,7 @@ sas:
 ## Extensões
 extension:
   enabled: false
+  zipurl: ""
 
 
 ## Configurações de url de acesso

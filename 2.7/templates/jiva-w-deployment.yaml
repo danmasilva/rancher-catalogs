@@ -76,6 +76,8 @@ spec:
           value: "{{ .Values.banco.sid }}"
         - name: HAS_EXTENSIONS
           value: "{{ .Values.extension.enabled }}"
+        - name: EXTENSION_ZIPURL
+          value: "{{ .Values.extension.zipurl }}"
         - name: IP_BD_JIVAW
           valueFrom:
             secretKeyRef:
