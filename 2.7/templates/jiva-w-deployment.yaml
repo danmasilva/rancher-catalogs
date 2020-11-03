@@ -74,7 +74,7 @@ spec:
           value: "{{ .Values.banco.sid }}"
         - name: SID_BD_JIVAW
           value: "{{ .Values.banco.sid }}"
-        - name: HAS_EXTENSIONS
+        - name: HASEXTENSIONS
           value: "{{ .Values.extension.enabled }}"
         - name: EXTENSION_ZIPURL
           value: "{{ .Values.extension.zipurl }}"
