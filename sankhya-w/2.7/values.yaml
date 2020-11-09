@@ -1,0 +1,128 @@
+# Path do NFS
+volume:
+  pathDefault: /home/mgeweb/compartilhado/
+
+# Imagens Hub e Versões
+imageRepository:
+  storageClass: "volume-claim"
+  sankhyaw:
+    fullName: "jiva-w"
+    image: "sankhyacloud/plataforma-om-sankhya"
+    imageTag: "jdk11-1.2.2"
+  sas:
+    fullName: "sas"
+    image: "highlanderdantas/sas"
+    imageTag: "v2.5"
+  datasync:
+    fullName: "datasync"
+    image: "jivagestaoempresarial/datasync"
+    imageTag: "2.0"
+  esocial:
+    fullName: "esocial"
+    image: "jivagestaoempresarial/esocial"
+    imageTag: "2.0"
+  
+jboss:
+  envs: -Duser.language=pt -Duser.country=BR -Dsun.jnu.encoding=ISO-8859-1 -Dfile.encoding=ISO-8859-1
+
+annotations: {}
+
+## Pacote para Instalação
+pacote:
+  versao: "sankhya-w_4.1b140.pkg"
+  versionNew: ""
+
+## Dados do Banco de Dados
+banco:
+  tipo: "ORACLE"
+  ip: ""
+  porta: "1521"
+  sid: "ORCL"
+  usuario: "System"
+  senha: "tecsis"
+
+bancos_existentes:
+  dboci2: 172.31.30.4
+  oci5: 172.31.30.26
+  oci6: 172.31.30.32
+  dbocit1: 172.31.30.15
+
+## Memoria 
+memoria:
+  sankhyaw:
+    jboss: "-Xms512m -Xmx1304m"
+    maximo: "2300"
+    media: "1024"
+  datasync:
+    maximo: "1024"
+    media: "512"
+  sas:
+    maximo: "400"
+    media: "100"
+  esocial:
+    maximo: "600"
+    media: "350"
+    
+
+## Cpu 
+cpu:
+  sankhyaw:
+    maximo: "550m"
+    media: "100m"
+  datasync:
+    maximo: "400m"
+    media: "100m"
+  sas:
+    maximo: "150m"
+    media: "100m"
+  esocial:
+    maximo: "400m"
+    media: "100m"
+
+
+## Possui SAs
+sasdelphi:
+  enabled: false
+
+## Possui SanNfe
+sannfe:
+  enabled: false
+
+## Possui sankhyaw
+sankhyaw:
+  enabled: true
+
+## Possui Datasync
+datasync:
+  enabled: false
+
+## Possui Esocial
+esocial:
+  enabled: false
+
+## Chave SAS
+sas:
+  chaveCliente: ""
+
+## Extensões
+extension:
+  enabled: false
+  zipurl: ""
+
+
+## Configurações de url de acesso
+loadBalancer:
+  dns: .sankhyacloud.com.br
+  dnsNew: ""
+  sankhyaw:
+    enabled: false
+  datasync:
+    enabled: false
+  esocial:
+    enabled: false
+
+dns:
+  nameservers:
+    - 208.67.222.222
+    - 8.8.8.8
+

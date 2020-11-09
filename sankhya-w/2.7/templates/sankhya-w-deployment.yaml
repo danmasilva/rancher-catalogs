@@ -1,0 +1,196 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sankhya-w
+  generation: 1
+  labels:
+    io.kompose.service: sankhya-w
+    {{- if ne .Values.banco.alias "outro..."}}
+    cloud.dbName: "{{ .Values.banco.alias }}"
+    {{- end }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      io.kompose.service: sankhya-w
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+      {{- range $key, $value := .Values.annotations }}
+        {{ $key }}: {{ $value }}
+      {{- end }}
+      labels:
+        io.kompose.service: sankhya-w
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: monitoring
+                operator: NotIn
+                values:
+                - "true"
+      containers:
+      - args:
+        - sudo chown -R mgeweb:mgeweb /home/mgeweb/.jboss_conf/ /home/mgeweb/sankhyaw-dpm/ /home/mgeweb/SankhyaW/Anexos
+          /home/mgeweb/repositorio /home/mgeweb/pacotes-sannfe/ && /home/mgeweb/DPM/scripts/./wildfly.sh
+          ; java -jar /home/mgeweb/DPM/docker-package-manager.jar ; /home/mgeweb/DPM/scripts/./sannfe.sh;
+          sudo chown -R mgeweb:mgeweb /home/mgeweb/SanNFe /home/mgeweb/wildfly_producao/standalone/log
+          && /home/mgeweb/DPM/scripts/./visualvm.sh && sleep 10  && sed -i 's/<min-pool-size>100/<min-pool-size>5/g' /home/mgeweb/wildfly_producao/standalone/deployments/mge-ds.xml &&
+          sed -i 's/<max-pool-size>100/<max-pool-size>20/g' /home/mgeweb/wildfly_producao/standalone/deployments/mge-ds.xml
+          && sleep 30 ; /home/mgeweb/wildfly_producao/bin/./standalone.sh
+          -Djape.lazy.init=true -Djape.lob.fields.as.lazy=true -Djape.ignore.ligacao.inconsistente=true
+        command:
+        - /bin/sh
+        - -c
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "{{ .Values.jboss.envs }}"
+        - name: HASSANFE
+          value: "{{ .Values.sannfe.enabled }}"
+        - name: CHAVESAS
+          value: "{{ .Values.sas.chaveCliente }}"
+        - name: CLIENTE
+          value: "{{ .Release.Namespace }}"
+        - name: MEMORIA_JBOSS
+          value: "{{ .Values.memoria.sankhyaw.jboss }}"
+        {{ if not .Values.pacote.versionNew }}
+        - name: PACOTE_SNKW
+          value: "{{ .Values.pacote.versao }}"
+        {{- else }}
+        - name: PACOTE_SNKW
+          value: "{{ .Values.pacote.versionNew }}"
+        {{- end }}
+        - name: PORTA_BD_SNKW
+          value: "{{ .Values.banco.porta }}"
+        - name: TIPO_BD
+          value: "{{ .Values.banco.tipo }}"
+        - name: TIPO_SERVIDOR
+          value: "WILDFLY"
+        - name: SID_BD_SNKW
+          value: "{{ .Values.banco.sid }}"
+        - name: HASEXTENSIONS
+          value: "{{ .Values.extension.enabled }}"
+        - name: EXTENSION_ZIPURL
+          value: "{{ .Values.extension.zipurl }}"
+        - name: IP_BD_SNKW
+          valueFrom:
+            secretKeyRef:
+              name: sankhya-w
+              key: banco-ip
+        - name: SENHA_BD_SNKW
+          valueFrom:
+            secretKeyRef:
+              name: sankhya-w
+              key: banco-password
+        - name: USUARIO_BD_SNKW
+          valueFrom:
+            secretKeyRef:
+              name: sankhya-w
+              key: banco-user 
+        image: {{  .Values.imageRepository.sankhyaw.image }}:{{  .Values.imageRepository.sankhyaw.imageTag }}
+        imagePullPolicy: IfNotPresent
+        name: sankhya-w
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 120
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 120
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 120
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 120
+        resources:
+          limits:
+            memory: {{ .Values.memoria.sankhyaw.maximo }}Mi
+            cpu:  {{ .Values.cpu.sankhyaw.maximo }}
+          requests:
+            memory: {{ .Values.memoria.sankhyaw.media }}Mi
+            cpu: {{ .Values.cpu.sankhyaw.media }}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities: {}
+          privileged: true
+        volumeMounts:
+        - mountPath: /home/mgeweb/repositorio
+          name: volume-repositorio
+        - mountPath: /home/mgeweb/SanNFe
+          name: volume-sannfe
+        - mountPath: /home/mgeweb/SankhyaW/Anexos
+          name: volume-anexos
+        - mountPath: /home/mgeweb/pacotes-sannfe/
+          name: volume-pacotessanfe
+        - mountPath: /home/mgeweb/sankhyaw-dpm/pkgs
+          name: volume-pacotessankhyaw
+        - mountPath: /home/mgeweb/.jboss_conf
+          name: volume-jbossconfig
+        - mountPath:  /home/mgeweb/wildfly_producao/standalone/log
+          name: volume-logs
+        {{ if .Values.extension.enabled }}
+        - mountPath: /home/mgeweb/package-manager/extensions/jboss_home
+          name: extensions
+        {{ end }}
+      dnsConfig:
+        nameservers:
+        {{- range .Values.dns.nameservers }}
+          - {{ . | title | quote }}
+        {{- end }}  
+        options:
+        - name: ndots
+          value: "15"
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: volume-repositorio
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/repositorio/
+          type: DirectoryOrCreate
+      - name: volume-sannfe
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/SanNFe/
+          type: DirectoryOrCreate
+      - name: volume-anexos
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/Anexos/
+          type: DirectoryOrCreate
+      - name: volume-pacotessanfe
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/pacotes/sannfe/
+          type: DirectoryOrCreate
+      - name: volume-pacotessankhyaw
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}pacotessankhyaw/
+          type: DirectoryOrCreate
+      - name: volume-jbossconfig
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/jboss_config/
+          type: DirectoryOrCreate
+      - name: volume-logs
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Name }}/sankhyaw/logs/
+          type: DirectoryOrCreate
+      {{ if .Values.extension.enabled }}
+      - name: extensions
+        hostPath: 
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/extensions/jboss_home/
+          type: DirectoryOrCreate
+      {{ end }}
+        
+status: {}

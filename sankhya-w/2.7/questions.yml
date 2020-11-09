@@ -1,0 +1,225 @@
+categories:
+  - sankhya
+labels:
+  io.rancher.certified: partner
+questions:
+# Pacote Instalação
+- variable: pacote.versao
+  label: "Escolha a versão"
+  description: "Pacote que será instalado (será buscado no ftp-sankhya)"
+  type: string
+  default: "jiva-w_4.1b158.pkg"
+  required: true
+  group: "Pacote para instalação"
+
+# Banco de Dados
+- variable: banco.tipo
+  label: "Tipo do Banco de Dados"
+  description: "Tipo do Banco Dados"
+  type: enum
+  default: "ORACLE"
+  required: true
+  group: "Configurando o Banco de Dados"
+  options:
+    - "ORACLE"
+    - "SQLSERVER"
+
+- variable: banco.alias
+  label: "Escolha um banco"
+  description: "Escolha um banco existente ou informe um ip"
+  type: enum
+  options:
+    - "dboci2"
+    - "oci5"
+    - "oci6"
+    - "dbocit1"
+    - "outro..."
+  group: "Configurando o Banco de Dados"
+  required: true
+  show_subquestion_if: "outro..."
+  subquestions:
+  - variable: banco.ip
+    label: "IP do Banco de Dados"
+    description: "IP no qual está instalado o Banco de Dados"
+    type: string
+    required: true
+    group: "Configurando o Banco de Dados"
+
+- variable: banco.porta
+  label: "Porta do Banco de Dados"
+  description: "Porta Padrão Oracle: 1521 - Porta Padrão SqlServer: 1433"
+  type: string
+  default: "1521"
+  required: true
+  group: "Configurando o Banco de Dados"
+
+- variable: banco.sid
+  label: "SID do Banco de Dados"
+  description: "Sid Padrão Oracle: ORCL - Sid Padrão SqlServer: MYSQLSERVER"
+  type: string
+  default: "ORCL"
+  required: true
+  group: "Configurando o Banco de Dados"
+
+- variable: banco.usuario
+  label: "Usuário do Banco de Dados"
+  description: "Usuário do Banco de Dados"
+  type: string
+  required: true
+  group: "Configurando o Banco de Dados"
+
+- variable: banco.senha
+  label: "Senha do Banco de Dados"
+  description: "Senha do Banco de Dados"
+  type: password
+  required: true
+  group: "Configurando o Banco de Dados"
+
+- variable: memoria.sankhyaw.maximo
+  label: "Quantidade de memória máxima do container"
+  description: "Memória máxima que será alocada para o container."
+  type: string
+  default: "2300"
+  required: true
+  group: "Configurando Memoria e Cpu da Aplicação"
+
+- variable: memoria.sankhyaw.media
+  label: "Quantidade de memória media do container"
+  description: "Memória media que será alocada para o container."
+  type: string
+  default: "2300"
+  required: true
+  group: "Configurando Memoria e Cpu da Aplicação"
+
+- variable: cpu.sankhyaw.maximo
+  label: "Quantidade de cpu máximo do container"
+  description: "Cpu máximo que será alocada para o container."
+  type: enum
+  default: "550m"
+  required: true
+  options:
+    - "550m"
+    - "600m"
+    - "700m"
+  group: "Configurando Memoria e Cpu da Aplicação"
+
+- variable: cpu.sankhyaw.media
+  label: "Quantidade de cpu media do container"
+  description: "Cpu media que será alocada para o container."
+  type: enum
+  default: "100m"
+  required: true
+  options:
+    - "100m"
+    - "200m"
+  group: "Configurando Memoria e Cpu da Aplicação"
+
+
+
+# Outras Aplicações
+- variable: sas.chaveCliente
+  label: "Chave SAS do cliente?"
+  description: "Chave do cliente"
+  type: string
+  default: ""
+  group: "Outras Aplicações"
+
+- variable: sasdelphi.enabled
+  label: "Cliente possui Delphi?"
+  description: "Caso seja marcado true o container do SAS não irá atualizar o parâmetro IPSERVACESS"
+  type: boolean
+  default: false
+  required: true
+  group: "Outras Aplicações"
+
+- variable: sannfe.enabled
+  label: "Habilitar SanNfe?"
+  description: "Caso seja marcado true irá realizar o download do SanNfe "
+  type: boolean
+  default: false
+  required: true
+  group: "Outras Aplicações"
+
+- variable: datasync.enabled
+  label: "Cliente possui Datasync?"
+  description: "Caso seja marcado true irá subir um container para o Data Sync"
+  type: boolean
+  default: false
+  required: true
+  group: "Outras Aplicações"
+
+- variable: esocial.enabled
+  label: "Cliente possui Esocial?"
+  description: "Caso seja marcado true irá subir um container com o SanESocial"
+  type: boolean
+  default: false
+  required: true
+  group: "Outras Aplicações"
+
+- variable: extension.enabled
+  label: "Cliente possui extensões?"
+  description: "Caso seja marcado true irá instalar as extensões durante o deploy"
+  type: boolean
+  default: false
+  required: true
+  group: "Outras Aplicações"
+  show_subquestion_if: true
+  subquestions:
+  - variable: extension.zipurl
+    label: "URL para download das extensões:"
+    description: "URL para download das extensões. Deve estar compactado em zip"
+    type: string
+    required: true
+    group: "Configurando as Extensões"
+
+# Load Balancer
+- variable: loadBalancer.dns
+  label: "Defina o dns do Load balancer"
+  description: "Dns do Load balancer, ex: .sankhyacloud.com.br"
+  type: enum
+  default: ".sankhyacloud.com.br"
+  required: true
+  options:
+    - ".teste.sankhyacloud.com.br"
+    - ".orcl.sankhyacloud.com.br"
+    - ".monitoring.sankhyacloud.com.br"
+    - ".sankhyacloud.com.br"
+    - "outros..."
+  group: "Load Balancing"
+  show_subquestion_if: "outros..."
+  subquestions:
+  - variable: loadBalancer.dnsNew
+    label: Digite novo dns
+    type: string
+    required: true
+    description: "Dns do Load balancer, ex: .sankhyacloud.com.br"
+
+- variable: loadBalancer.sankhyaw.enabled
+  label: "Definir hostname do Sankhyaw para o loadBalancer"
+  description: "Define o dns do workload jivaw exemplo: cliente.sankhyacloud.com.br"
+  type: boolean
+  default: true
+  required: true
+  group: "Load Balancing"
+
+- variable: loadBalancer.datasync.enabled
+  label: "Definir hostname do DataSync para o loadBalancer"
+  description:  "Define o dns do workload datasync exemplo: cliente.datasync.sankhyacloud.com.br"
+  type: boolean
+  show_if: "datasync.enabled=true"
+  default: true
+  required: true
+  group: "Load Balancing"
+
+- variable: loadBalancer.esocial.enabled
+  label: "Definir hostname do Esocial para o loadBalancer"
+  description:  "Define o dns do workload esocial exemplo: cliente.esocial.sankhyacloud.com.br"
+  type: boolean
+  show_if: "esocial.enabled=true"
+  default: true
+  required: true
+  group: "Load Balancing"
+
+
+
+

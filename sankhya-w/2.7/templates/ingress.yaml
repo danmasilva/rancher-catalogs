@@ -1,0 +1,51 @@
+{{- if ( or .Values.loadBalancer.sankhyaw.enabled .Values.loadBalancer.esocial.enabled  .Values.loadBalancer.datasync.enabled ) }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  generation: 1
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 200m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3000"
+spec:
+  rules:
+  {{- if .Values.loadBalancer.sankhyaw.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: {{ .Release.Name }}{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: {{ .Release.Name }}{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: sankhya-w
+          servicePort: 8080
+  {{- end }}
+  {{- if .Values.loadBalancer.datasync.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: {{ .Release.Name }}.datasync{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: {{ .Release.Name }}.datasync{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: datasync
+          servicePort: 8080
+  {{- end }}
+  {{- if .Values.loadBalancer.esocial.enabled }}
+  {{- if not .Values.loadBalancer.dnsNew }}
+  - host: {{ .Release.Name }}.esocial{{ .Values.loadBalancer.dns }}
+  {{- else }}
+  - host: {{ .Release.Name }}.esocial{{ .Values.loadBalancer.dnsNew }}
+  {{- end }}
+    http:
+      paths:
+      - backend:
+          serviceName: esocial
+          servicePort: 8778
+  {{- end }}
+status:
+  loadBalancer: {}
+{{- end }}
