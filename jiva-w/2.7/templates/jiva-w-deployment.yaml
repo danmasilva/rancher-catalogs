@@ -141,7 +141,7 @@ spec:
         - mountPath: /home/mgeweb/.jboss_conf
           name: volume-jbossconfig
         {{ if .Values.extension.enabled }}
-        - mountPath: /home/mgeweb/package-manager/extensions
+        - mountPath: /home/mgeweb/package-manager/extensions/jboss_home
           name: extensions
         {{ end }}
       dnsConfig:
@@ -184,7 +184,7 @@ spec:
       {{ if .Values.extension.enabled }}
       - name: extensions
         hostPath: 
-          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/extensions/
+          path: {{ .Values.volume.pathDefault }}{{ .Release.Namespace }}/jivaw/extensions/jboss_home/
           type: DirectoryOrCreate
       {{ end }}
 status: {}
